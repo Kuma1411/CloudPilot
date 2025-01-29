@@ -1,4 +1,10 @@
 // sidePanel.js
+
+import { getActiveTabURL } from "./utils.js";
+
+
+let dom_elements = [];
+
 function autoExpand(field) {
     field.style.height = 'auto'; // Reset the height
     field.style.height = Math.max(field.scrollHeight, 60) + 'px'; // Set it to the scrollHeight
@@ -17,12 +23,23 @@ const submitButton = document.getElementById('submit-btn');
 const textField = document.getElementById('text-input');
 
 
-function handleSubmit() {
+
+
+async function handleSubmit() {
 
   const message = textField.value.trim();
-
+  const activeTab = await getActiveTabURL();
   if (message) {
+    chrome.tabs.sendMessage(activeTab.id, {
+      type: "extractDOM",
+      body:"dom"
+    }, (response) => {
+      dom_elements = response;
+    });
+    console.log("Dom elements",dom_elements);
     console.log('Message Submitted:', message);
+
+    
 
     textField.value = '';
   } else {
