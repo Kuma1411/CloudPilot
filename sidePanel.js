@@ -36,10 +36,25 @@ async function handleSubmit() {
     }, (response) => {
       dom_elements = response;
     });
-    console.log("Dom elements",dom_elements);
-    console.log('Message Submitted:', message);
+    console.log(JSON.stringify({prompt:message,context:dom_elements}))
 
-    
+    const response = await fetch('http://127.0.0.1:8000/predict',{
+      method:'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body:JSON.stringify({prompt:message,context:dom_elements})
+    })
+
+    const data = await response.json();
+    console.log("model output",data);
+    if (response.ok) {
+      chrome.tabs.sendMessage(activeTab.id, {
+        type: "steps",
+        body: data.prediction
+      });
+    }
+
 
     textField.value = '';
   } else {
