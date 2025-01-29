@@ -2,66 +2,86 @@
 <html>
   <head>
     <title>Cloud Pilot</title>
+    <style>
+      html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      .main {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+        color: rgb(194, 192, 192);
+        background: linear-gradient(to bottom, black, rgb(11, 11, 43));
+      }
+
+      .chatWindow {
+        flex: 1;
+        width: 340px;
+        margin-top: 5px;
+        padding: 4px;
+        font-weight: 600;
+        border-style: solid;
+        border-radius: 15px;
+        border-width: 2px;
+        border-color: rgb(145, 145, 145);
+        margin-bottom: 10px;
+        margin-left: 4px;
+      }
+
+      .chatWindow-heading {
+        font-size: larger;
+      }
+
+      .chatWindow-chatArea {
+        overflow-y: scroll;
+      }
+
+      .chatBox {
+        display: flex;
+        flex-direction: column;
+        padding: 4px;
+        width: 340px;
+        border-radius: 15px;
+        border-width: 2px;
+        border-color: rgb(145, 145, 145);
+        margin-left: 4px;
+        margin-bottom: 4px;
+      }
+
+      .textField {
+        display: block;
+        width: 100%;
+        overflow: hidden;
+        resize: none;
+        min-height: 20px;
+        max-height: 120px;
+        line-height: 20px;
+        outline: none;
+        border-radius: 15px;
+        border-width: 2px;
+        padding: 5px;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+
+      .chatOptions {
+        display:flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: end;
+      }
+
+      ::-webkit-scrollbar {
+        width: 0px;
+        height: 0px;
+      }
+    </style>
   </head>
-  <style>
-    html, body {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    overflow: hidden;
-    }
-
-    .main {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    color: rgb(194, 192, 192);
-    background: linear-gradient(to bottom, black, rgb(11, 11, 43));
-  }
-
-    .chatWindow {
-      flex: 1;
-      width: 340px;
-      margin-top: 5px;
-      padding: 4px;
-      font-weight:600;
-      border-style: solid;
-      border-radius: 15px;
-      border-width: 2px;
-      border-color: rgb(145, 145, 145);
-      margin-bottom: 10px;
-      margin-left: 4px;
-    }
-
-    .chatWindow-heading{
-      font-size: larger;
-   
-    }
-
-    .chatWindow-chatArea{
-      overflow-y: scroll;
-    }
-
-    .chatBox {
-      padding: 4px;
-      height: 140px;
-      width: 340px;
-      border-style: solid;
-      border-radius: 15px;
-      border-width: 2px;
-      border-color: rgb(145, 145, 145);
-      margin-left: 4px;
-      margin-bottom: 4px;
-    }
-    
-    ::-webkit-scrollbar {
-      width: 0px;
-      height: 0px;
-    }
-
-
-  </style>
   <body>
     <div class="main">
       <div class="chatWindow">
@@ -69,8 +89,14 @@
         <div class="chatWindow-chatArea"></div>
       </div>
       <div class="chatBox">
-        Chat
+        <div>
+          <textarea id="text-input" class="textField" placeholder="Type your message..." rows="1"></textarea>
+        </div>
+        <div class="chatOptions">
+          <button id="submit-btn">Submit</button>
+        </div>
       </div>
     </div>
+    <script src="sidePanel.js"></script>
   </body>
 </html>
