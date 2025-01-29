@@ -2,7 +2,10 @@
     "name":"Cloud Pilot",
     "version":"1.0",
     "description":"A chrome extension for AWS to help people navigate and maintain their cloud infra with AI.",
-    "permissions":["storage","tabs"],
+    "permissions":["storage","tabs","sidePanel"],
+    "side_panel": {
+      "default_path": "sidePanel.html"
+    },
     "host_permissions":["https://*.console.aws.amazon.com/*"],
     "background":{
         "service_worker": "background.js"
@@ -25,8 +28,7 @@
         "default_icon": {
 
         },
-        "default_title": "Cloud Pilot",
-        "default_popup": "popup.html"
+        "default_title": "Cloud Pilot"
       },
       "manifest_version": 3
 }
