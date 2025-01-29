@@ -3,8 +3,72 @@
   <head>
     <title>Cloud Pilot</title>
   </head>
+  <style>
+    html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+
+    .chatWindow {
+      flex: 1;
+      width: 340px;
+      margin-top: 5px;
+      padding: 4px;
+      font-weight:600;
+      border-style: solid;
+      border-radius: 10px;
+      border-width: 2px;
+      border-color: black;
+      margin-bottom: 10px;
+      margin-left: 4px;
+    }
+
+    .chatWindow-heading{
+      font-size: larger;
+   
+    }
+
+    .chatWindow-chatArea{
+      overflow-y: scroll;
+    }
+
+    .chatBox {
+      padding: 4px;
+      height: 140px;
+      width: 340px;
+      border-style: solid;
+      border-radius: 10px;
+      border-width: 2px;
+      border-color: black;
+      margin-left: 4px;
+      margin-bottom: 4px;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 0px;
+      height: 0px;
+    }
+
+
+  </style>
   <body>
-    <h1>All sites sidepanel extension</h1>
-    <p>This side panel is enabled on all sites</p>
+    <div class="main">
+      <div class="chatWindow">
+        <div class="chatWindow-heading">Chat</div>
+        <div class="chatWindow-chatArea"></div>
+      </div>
+      <div class="chatBox">
+        Chat
+      </div>
+    </div>
   </body>
 </html>
