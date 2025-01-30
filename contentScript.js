@@ -1,23 +1,25 @@
 (() => {
 
-  
-function extractDOM() {
-  var elements = document.querySelectorAll('button, a, input, select, textarea');
-  var visibleElements = [];
 
-  elements.forEach(function(element) {
-      if (element.offsetWidth > 0 && element.offsetHeight > 0) {  // Ensures the element is visible
-          var className = element.className || '';
-          var textContent = element.textContent || element.value || '';
-          visibleElements.push({
-              className: className,
-              textContent: textContent.trim(),
-          });
-      }
-  });
+  function extractDOM() {
+    var elements = document.querySelectorAll('button, a, input, select, textarea');
+    var visibleElements = [];
 
-  return visibleElements;
-  }
+    elements.forEach(function(element) {
+        if (element.offsetWidth > 0 && element.offsetHeight > 0) {  // Ensures the element is visible
+            var className = element.className || '';
+            var textContent = element.textContent || element.value || '';
+            visibleElements.push({
+                className: className,
+                textContent: textContent.trim(),
+            });
+        }
+    });
+
+    return visibleElements;
+    }
+
+
 
 
 
@@ -34,12 +36,11 @@ function extractDOM() {
     }
 
     if (type === "extractDOM") {
-      response(extractDOM());
+      response(extractDOM());  // Respond with the list of visible elements
     }
 
   });
+
+
+
 })();
-
-
-
-
