@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <title>Cloud Pilot</title>
     <style>
       html, body {
@@ -8,6 +11,35 @@
         width: 100%;
         margin: 0;
         overflow: hidden;
+        font-family: "Inter Tight", serif;
+      }
+
+
+      .header{
+        padding-right: 10px;
+        padding-top: 5px;
+        display: flex;
+        flex-direction: row;
+        justify-content: end;
+        align-items: center;
+        height: 40px;
+      }
+
+      .navigate {
+        border-radius: 50%;
+        background-color: black;
+        box-shadow: none;
+        transition: box-shadow 0.3s ease; /* Optional smooth transition */
+        width: 32px;      
+        height: 32px;          
+        display: flex;        
+        justify-content: center;
+        align-items: center;  
+        cursor: pointer;
+      } 
+
+      .navigate:hover {
+        box-shadow: 0 8px 16px rgba(169, 169, 169, 0.8), 0 12px 30px rgba(169, 169, 169, 0.5); /* Deeper grey shadow on hover */
       }
 
       .main {
@@ -15,7 +47,7 @@
         flex-direction: column;
         height: 100%;
         width: 100%;
-        color: rgb(194, 192, 192);
+        color: azure;
         background: linear-gradient(to bottom, black, rgb(11, 11, 43));
       }
 
@@ -25,16 +57,23 @@
         margin-top: 5px;
         padding: 4px;
         font-weight: 600;
-        border-style: solid;
         border-radius: 15px;
-        border-width: 2px;
-        border-color: rgb(145, 145, 145);
         margin-bottom: 10px;
         margin-left: 4px;
       }
 
-      .chatWindow-heading {
-        font-size: larger;
+      .cloudPilot{
+        width: 200px;
+        background-color: rgb(54, 54, 54);
+        border-radius: 10px;
+        padding: 6px;
+      }
+
+      .user{
+        width: 200px;
+        background-color: rgb(54, 54, 158);
+        border-radius: 10px;
+        padding: 6px;
       }
 
       .chatWindow-chatArea {
@@ -46,9 +85,7 @@
         flex-direction: column;
         padding: 4px;
         width: 340px;
-        border-radius: 15px;
-        border-width: 2px;
-        border-color: rgb(145, 145, 145);
+        height: 100px;
         margin-left: 4px;
         margin-bottom: 4px;
       }
@@ -58,15 +95,21 @@
         width: 100%;
         overflow: hidden;
         resize: none;
-        min-height: 20px;
-        max-height: 120px;
+        min-height: 40px;
+        max-height: 110px;
         line-height: 20px;
         outline: none;
         border-radius: 15px;
-        border-width: 2px;
-        padding: 5px;
+        border-width: 1px;
+        padding-left: 10px;
+        padding-top: 10px;
         font-size: 14px;
         box-sizing: border-box;
+        background-color: black;
+        color: azure;
+        font-family: "Inter Tight", serif;
+        border: none;
+        align-self: flex-start;
       }
 
       .chatOptions {
@@ -80,20 +123,54 @@
         width: 0px;
         height: 0px;
       }
+
+      .submitBtn {
+        background-color: rgb(30, 95, 30);;
+        border-radius: 50%;
+        color: azure;
+        outline: none;
+        border: none;
+        height: 40px;
+        width: 45px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(50, 54, 50, 0.5);  /* Green glow effect */
+        font-family: "Inter Tight", serif;
+      }
+
+
+
     </style>
   </head>
   <body>
     <div class="main">
+      <div class="header">
+        <div class="navigate">
+          <img style="height: 24px;" src="assets/navigate.png">
+        </div>
+      </div>
       <div class="chatWindow">
-        <div class="chatWindow-heading">Chat</div>
-        <div class="chatWindow-chatArea"></div>
+        <div class="chatWindow-chatArea">
+          <div style="display: flex; align-items: flex-start; flex-direction: column; width: 100%; margin-top: 14px; margin-bottom: 14px;">
+            <div class="cloudPilot">
+              <div style="font-size: 10px; margin-bottom: 3px;">Cloud Pilot</div>
+            <div style="font-size: 12px;">Hey, how can I help you today and make your AWS journey more simpler and enjoyable!</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-end; flex-direction: column; width: 100%; margin-top: 14px; margin-bottom: 14px;">
+            <div class="user">
+              <div style="font-size: 10px; margin-bottom: 3px;">User</div>
+            <div style="font-size: 12px;">Hey, how can I help you today and make your AWS journey more simpler and enjoyable!</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="chatBox">
-        <div>
-          <textarea id="text-input" class="textField" placeholder="Type your message..." rows="1"></textarea>
+        <div style="display: flex; flex-direction: row; align-content: center; background-color: black; border-radius: 15px;">
+          <textarea id="text-input" class="textField" placeholder="Ask your query..." rows="1"></textarea>
+          <button id="submit-btn" class="submitBtn"><img style="height:25px;" src="assets/cloud.png"></button>
         </div>
         <div class="chatOptions">
-          <button id="submit-btn">Submit</button>
+         
         </div>
       </div>
     </div>
