@@ -35,7 +35,7 @@ async function handleSubmit() {
       console.log("model output",data);
       if (resp.ok) {
         chrome.tabs.sendMessage(activeTab.id, {
-          type: "steps",
+          type: "navigate",
           body: data.prediction
         });
       }
@@ -57,13 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
     textField.addEventListener('input', () => autoExpand(textField));
   }
 
-    // Event listener for the submit button
   submitButton.addEventListener('click', handleSubmit);
 
-  // Optional: Handle "Enter" key to submit the message
+
   textField.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
-      event.preventDefault(); // Prevent default Enter behavior (new line)
+      event.preventDefault();
       handleSubmit();
     }
   });

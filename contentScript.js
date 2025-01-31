@@ -6,20 +6,69 @@
     var visibleElements = [];
 
     elements.forEach(function(element) {
-        if (element.offsetWidth > 0 && element.offsetHeight > 0) {  // Ensures the element is visible
-            var className = element.className || '';
-            var textContent = element.textContent || element.value || '';
-            visibleElements.push({
-                className: className,
-                textContent: textContent.trim(),
-            });
-        }
+            var textContent = element.textContent || element.value;
+
+            // If there's no direct textContent, check child elements
+            if (!textContent && element.children.length > 0) {
+                element.childNodes.forEach(function(child) {
+                    if (child.nodeType === Node.TEXT_NODE) {
+                        textContent = child.textContent.trim();
+                        visibleElements.push(textContent.trim());
+                    }
+                });
+            }
+            if (textContent && textContent.trim()) {
+                visibleElements.push(textContent.trim());
+            }
     });
 
     return visibleElements;
+  }
+
+
+  function findElementByTextInDOM(searchText) {
+    var elements = document.querySelectorAll('button, a, input, select, textarea');
+    searchText = searchText.trim().toLowerCase();  // Normalize the search text
+
+    for (let element of elements) {
+        var textContent = element.textContent || element.value;
+
+        // If there's text content in the element, check it
+        if (textContent) {
+            textContent = textContent.trim().toLowerCase();
+
+            // If the element's direct text content matches, return the element
+            if (textContent.includes(searchText)) {
+                return element;
+            }
+        }
+
+
+        if (element.children.length > 0) {
+            for (let child of element.childNodes) {
+                if (child.nodeType === Node.TEXT_NODE && child.textContent.trim().toLowerCase().includes(searchText)) {
+                    return element;
+                }
+            }
+        }
     }
 
+    return null;  
+  }
 
+
+  function openHiddenNavIfNeeded(element) {
+    const navElements = document.querySelectorAll('nav[aria-hidden="true"]');
+    navElements.forEach(nav => {
+
+      if (element && nav.contains(element)) {
+        const navbar = document.querySelector('button[aria-label="Open navigation drawer"]');
+        if(navbar){
+          navbar.click();
+        }
+      }
+    });
+  }
 
 
 
@@ -73,21 +122,25 @@
     50% { background-position: 400% 0; }
     100% { background-position: 0 0; }
   }`
-    
-    // Append the style to the head of the document
+
     document.head.appendChild(style);
 
-    if (type === "steps") {
+    if (type === "navigate") {
         if (body) {
-          const element = document.querySelector(`[class="${body}"]`);
+          const element = findElementByTextInDOM(body);
+          console.log(element)
           if (element) {
+            openHiddenNavIfNeeded(element);
+            if (element.getBoundingClientRect().top >= window.innerHeight || element.getBoundingClientRect().bottom <= 0) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             element.classList.add('glow');
           }
         }
     }
 
     if (type === "extractDOM") {
-      response(extractDOM());  // Respond with the list of visible elements
+      response(extractDOM()); 
     }
 
   });
