@@ -2,59 +2,166 @@
 
 
   function extractDOM() {
-    var elements = document.querySelectorAll('button, a, input, select, textarea');
     var visibleElements = [];
-
-    elements.forEach(function(element) {
-            var textContent = element.textContent || element.value;
-
-            // If there's no direct textContent, check child elements
-            if (!textContent && element.children.length > 0) {
-                element.childNodes.forEach(function(child) {
-                    if (child.nodeType === Node.TEXT_NODE) {
-                        textContent = child.textContent.trim();
-                        visibleElements.push(textContent.trim());
-                    }
-                });
+    function extractFromContext(context) {
+      var elements = context.querySelectorAll('button, a, input, select, textarea');
+      
+      elements.forEach(function(element) {
+        var textContent = element.textContent || element.value;
+ 
+        if (!textContent && element.children.length > 0) {
+          element.childNodes.forEach(function(child) {
+            if (child.nodeType === Node.TEXT_NODE) {
+              textContent = child.textContent.trim();
+              visibleElements.push(textContent.trim());
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+              textContent = child.textContent.trim();
             }
-            if (textContent && textContent.trim()) {
-                visibleElements.push(textContent.trim());
-            }
+          });
+        }
+
+        if (textContent && textContent.trim()) {
+          visibleElements.push(textContent.trim());
+        }
+      });
+    }
+
+    extractFromContext(document.body);
+  
+
+    var iframes = document.querySelectorAll('iframe');
+    iframes.forEach(function(iframe) {
+      try {
+  
+        var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+  
+        if (iframeDocument) {
+          extractFromContext(iframeDocument.body);
+        }
+      } catch (e) {
+        console.warn('Could not access iframe content: ', e);
+      }
     });
-
+  
     return visibleElements;
   }
+  
+ 
+  function injectGlowStyle(documentToInject) {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .glow {
+        /* width: 220px;
+        height: 50px; */
+        border: none;
+        outline: none;
+        /* color: #fff; */
+        /* background: #111; */
+        cursor: pointer;
+        position: relative;
+        z-index: 0;
+        border-radius: 10px;
+    }
+    
+    .glow:before {
+        content: '';
+        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        background-size: 400%;
+        z-index: -1;
+        filter: blur(5px);
+        width: calc(100% + 1px);
+        height: calc(100% + 1px);
+        animation: glowing 8s linear infinite;
+        opacity: 1
+        border-radius: 10px;
+    }
+    
+    .glow:after {
+        z-index: -1;
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        left: 0;
+        top: 0;
+        border-radius: 10px;
+    }
+    
+    @keyframes glowing {
+      0% { background-position: 0 0; }
+      50% { background-position: 400% 0; }
+      100% { background-position: 0 0; }
+    }`;
+
+    documentToInject.head.appendChild(style);
+  }
+
+
+
+
 
 
   function findElementByTextInDOM(searchText) {
-    var elements = document.querySelectorAll('button, a, input, select, textarea');
-    searchText = searchText.trim().toLowerCase();  // Normalize the search text
-
-    for (let element of elements) {
-        var textContent = element.textContent || element.value;
-
-        // If there's text content in the element, check it
+    searchText = searchText.trim().toLowerCase(); 
+    let elementFound = null;
+  
+    // Function to search within a given context (document or iframe content)
+    function searchInContext(context) {
+      const elements = context.querySelectorAll('button, a, input, select, textarea');
+  
+      for (let element of elements) {
+        let textContent = element.textContent || element.value;
+  
         if (textContent) {
-            textContent = textContent.trim().toLowerCase();
-
-            // If the element's direct text content matches, return the element
-            if (textContent.includes(searchText)) {
-                return element;
-            }
+          textContent = textContent.trim().toLowerCase();
+          if (textContent.includes(searchText)) {
+            return element;
+          }
         }
-
-
+  
         if (element.children.length > 0) {
-            for (let child of element.childNodes) {
-                if (child.nodeType === Node.TEXT_NODE && child.textContent.trim().toLowerCase().includes(searchText)) {
-                    return element;
-                }
+          for (let child of element.childNodes) {
+            if (child.nodeType === Node.TEXT_NODE && child.textContent.trim().toLowerCase().includes(searchText)) {
+              return element;
             }
+          }
         }
+      }
+  
+      return null;
     }
+  
+    // Search in the main document body
+    elementFound = searchInContext(document.body);
+  
+    // If not found in the main document, search in iframes
+    if (!elementFound) {
+      const iframes = document.querySelectorAll('iframe');
+      for (let iframe of iframes) {
+        try {
 
-    return null;  
+          const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+  
+          if (iframeDocument) {
+            elementFound = searchInContext(iframeDocument.body);
+            if (elementFound) {
+              injectGlowStyle(iframeDocument)
+              return elementFound; 
+            }
+          }
+        } catch (e) {
+          console.warn('Could not access iframe content: ', e);
+        }
+      }
+    }
+    injectGlowStyle(document)
+    return elementFound; 
   }
+  
 
 
   function openHiddenNavIfNeeded(element) {
@@ -74,71 +181,20 @@
 
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
     const { type, body } = obj;
-    const style = document.createElement('style');
-    style.innerHTML = `
-    .glow {
-      /* width: 220px;
-      height: 50px; */
-      border: none;
-      outline: none;
-      /* color: #fff; */
-      /* background: #111; */
-      cursor: pointer;
-      position: relative;
-      z-index: 0;
-      border-radius: 10px;
-  }
-  
-  .glow:before {
-      content: '';
-      background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-      position: absolute;
-      top: 0px;
-      left: 0px;
-      background-size: 400%;
-      z-index: -1;
-      filter: blur(5px);
-      width: calc(100% + 1px);
-      height: calc(100% + 1px);
-      animation: glowing 8s linear infinite;
-      opacity: 1
-      border-radius: 10px;
-  }
-  
-  .glow:after {
-      z-index: -1;
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: #fff;
-      left: 0;
-      top: 0;
-      border-radius: 10px;
-  }
-  
-  @keyframes glowing {
-    0% { background-position: 0 0; }
-    50% { background-position: 400% 0; }
-    100% { background-position: 0 0; }
-  }`
-
-    document.head.appendChild(style);
 
     if (type === "navigate") {
         if (body) {
           const element = findElementByTextInDOM(body);
-          console.log(element)
           if (element) {
+            element.classList.add('glow');
             openHiddenNavIfNeeded(element);
             if (element.getBoundingClientRect().top >= window.innerHeight || element.getBoundingClientRect().bottom <= 0) {
               element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-            element.classList.add('glow');
+         
           }
         }
     }
-
     if (type === "extractDOM") {
       response(extractDOM()); 
     }
