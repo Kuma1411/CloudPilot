@@ -60,6 +60,8 @@
         border-radius: 15px;
         margin-bottom: 10px;
         margin-left: 4px;
+        overflow-y: auto; /* Enables vertical scrolling */
+        max-height: 100%; /* Prevents the chat window from growing beyond its container */
       }
 
       .cloudPilot{
@@ -76,9 +78,7 @@
         padding: 6px;
       }
 
-      .chatWindow-chatArea {
-        overflow-y: scroll;
-      }
+  
 
       .chatBox {
         display: flex;
@@ -144,22 +144,16 @@
   <body>
     <div class="main">
       <div class="header">
-        <div class="navigate">
+        <div class="navigate" id="navigate-btn">
           <img style="height: 24px;" src="assets/navigate.png">
         </div>
       </div>
       <div class="chatWindow">
-        <div class="chatWindow-chatArea">
-          <div style="display: flex; align-items: flex-start; flex-direction: column; width: 100%; margin-top: 14px; margin-bottom: 14px;">
+        <div id="chatArea">
+          <div style="display: flex; align-items: flex-start; flex-direction: column; width: 100%; margin-top: 14px; margin-bottom: 14px;" id="cloudPilot">
             <div class="cloudPilot">
               <div style="font-size: 10px; margin-bottom: 3px;">Cloud Pilot</div>
-            <div style="font-size: 12px;">Hey, how can I help you today and make your AWS journey more simpler and enjoyable!</div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: flex-end; flex-direction: column; width: 100%; margin-top: 14px; margin-bottom: 14px;">
-            <div class="user">
-              <div style="font-size: 10px; margin-bottom: 3px;">User</div>
-            <div style="font-size: 12px;">Hey, how can I help you today and make your AWS journey more simpler and enjoyable!</div>
+            <div style="font-size: 12px;" id="cloudPilot-message">Hey, how can I help you today and make your AWS journey more simpler and enjoyable!</div>
             </div>
           </div>
         </div>
