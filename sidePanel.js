@@ -14,7 +14,7 @@ function autoExpand(field) {
 
 
 async function handleSubmit() {
-    const textField = document.getElementById('text-input');
+  const textField = document.getElementById('text-input');
   const message = textField.value.trim();
   const activeTab = await getActiveTabURL();
   if (message) {
@@ -23,7 +23,7 @@ async function handleSubmit() {
       body:"dom"
     }, async (response) => {
       console.log(JSON.stringify({prompt:message,context:response}))
-      const resp = await fetch('http://127.0.0.1:8000/predict',{
+      const resp = await fetch('http://127.0.0.1:8000/navigate',{
         method:'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -32,11 +32,12 @@ async function handleSubmit() {
       })
   
       const data = await resp.json();
-      console.log("model output",data);
-      if (resp.ok) {
+      const parsedPrediction = JSON.parse(data.prediction);
+      console.log(parsedPrediction)
+      if (parsedPrediction) {
         chrome.tabs.sendMessage(activeTab.id, {
           type: "navigate",
-          body: data.prediction
+          body: parsedPrediction.name
         });
       }
       textField.value = '';
