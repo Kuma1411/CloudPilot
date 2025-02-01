@@ -3,6 +3,7 @@
 import { getActiveTabURL } from "./utils.js";
 
 let isNavigate = false;
+let isDisabled = false;
 
 
 let userChatHtml = `
@@ -56,33 +57,37 @@ async function handleSubmit() {
       body:"dom"
     }, async (response) => {
       console.log(JSON.stringify({prompt:message,context:response}))
-      const resp = await fetch('http://127.0.0.1:8000/navigate',{
-        method:'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body:JSON.stringify({prompt:message,context:response})
-      })
+      // const resp = await fetch('http://127.0.0.1:8000/navigate',{
+      //   method:'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   },
+      //   body:JSON.stringify({prompt:message,context:response})
+      // })
   
-      const data = await resp.json();
-      const parsedPrediction = JSON.parse(data.prediction);
-      console.log(parsedPrediction)
-      if (parsedPrediction) {
-        chrome.tabs.sendMessage(activeTab.id, {
-          type: "navigate",
-          body: parsedPrediction.name
-        });
-      }
-      const cloudPilot = document.getElementById("cloudPilot");
-      const newCloudPilot = cloudPilot.cloneNode(true);
-      const newMessage = newCloudPilot.querySelector('#cloudPilot-message');
-      newMessage.textContent = parsedPrediction.instructions;
-      const chatbox = document.getElementById("chatArea");
-      chatbox.appendChild(newCloudPilot);
-      newCloudPilot.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end'
-      });
+      // const data = await resp.json();
+      // const parsedPrediction = JSON.parse(data.prediction);
+      // console.log(parsedPrediction)
+      // if (parsedPrediction) {
+      //   chrome.tabs.sendMessage(activeTab.id, {
+      //     type: "navigate",
+      //     body: parsedPrediction.name
+      //   });
+      // }
+      // const cloudPilot = document.getElementById("cloudPilot");
+      // const newCloudPilot = cloudPilot.cloneNode(true);
+      // const newMessage = newCloudPilot.querySelector('#cloudPilot-message');
+      // newMessage.textContent = parsedPrediction.instructions;
+      // const chatbox = document.getElementById("chatArea");
+      // chatbox.appendChild(newCloudPilot);
+      // newCloudPilot.scrollIntoView({
+      //   behavior: 'smooth',
+      //   block: 'end'
+      // });
+      const submitButton = document.getElementById('submit-btn');
+      submitButton.removeEventListener('click',handleSubmit)
+      submitButton.style.backgroundColor = "grey"
+      
     });
   }else{
     chrome.tabs.sendMessage(activeTab.id, {
@@ -127,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const submitButton = document.getElementById('submit-btn');
   submitButton.addEventListener('click', handleSubmit);
+ 
 
 
   const navigateButton = document.getElementById('navigate-btn');
