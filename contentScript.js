@@ -178,6 +178,43 @@
   }
 
 
+  function openHiddenDropDownIfNeeded(element) {
+    const drpdwn = document.querySelectorAll('div[class="globalNav-2254"]');
+    drpdwn.forEach(dropdown => {
+
+      if (element && dropdown.contains(element)) {
+        const drpdwnButton = document.querySelector('button[aria-controls="menu--services"]');
+        if(drpdwnButton){
+          drpdwnButton.click();
+        }
+      }
+    });
+  }
+
+
+  function removeGlow() {
+    // Remove glow class from the main document
+    const elements = document.querySelectorAll('.glow');
+    elements.forEach((element) => {
+      element.classList.remove('glow');
+    });
+
+    // Remove glow class from elements inside iframes
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach((iframe) => {
+      try {
+        const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+        if (iframeDocument) {
+          const elementsInIframe = iframeDocument.querySelectorAll('.glow');
+          elementsInIframe.forEach((element) => {
+            element.classList.remove('glow');
+          });
+        }
+      } catch (e) {
+        return;
+      }
+    });
+  }
 
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
     const { type, body } = obj;
@@ -186,8 +223,10 @@
         if (body) {
           const element = findElementByTextInDOM(body);
           if (element) {
+            removeGlow();
             element.classList.add('glow');
             openHiddenNavIfNeeded(element);
+            openHiddenDropDownIfNeeded(element);
             if (element.getBoundingClientRect().top >= window.innerHeight || element.getBoundingClientRect().bottom <= 0) {
               element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }

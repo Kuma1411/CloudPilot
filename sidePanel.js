@@ -34,9 +34,6 @@ function handleNavigate(){
 }
 
 
-
-
-
 async function handleSubmit() {
   const textField = document.getElementById('text-input');
   const message = textField.value.trim();
@@ -49,6 +46,10 @@ async function handleSubmit() {
     const chatbox = document.getElementById("chatArea");
     chatbox.appendChild(newUser);
     textField.value = '';
+    newUser.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end'
+    });
    if(isNavigate){
     chrome.tabs.sendMessage(activeTab.id, {
       type: "extractDOM",
@@ -78,25 +79,38 @@ async function handleSubmit() {
       newMessage.textContent = parsedPrediction.instructions;
       const chatbox = document.getElementById("chatArea");
       chatbox.appendChild(newCloudPilot);
+      newCloudPilot.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end'
+      });
     });
   }else{
-    const resp = await fetch('http://127.0.0.1:8000/instruct',{
-      method:'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body:JSON.stringify({prompt:message,context:response})
-    })
-
-    const data = await resp.json();
-    const parsedPrediction = JSON.parse(data.prediction);
-    console.log(parsedPrediction);
-    const cloudPilot = document.getElementById("cloudPilot");
-    const newCloudPilot = cloudPilot.cloneNode(true);
-    const newMessage = newCloudPilot.querySelector('#cloudPilot-message');
-    newMessage.textContent = parsedPrediction.instructions;
-    const chatbox = document.getElementById("chatArea");
-    chatbox.appendChild(newCloudPilot);
+    chrome.tabs.sendMessage(activeTab.id, {
+      type: "extractDOM",
+      body:"dom"
+    }, async (response) => {
+      console.log(JSON.stringify({prompt:message,context:response}))
+      const resp = await fetch('http://127.0.0.1:8000/instruct',{
+        method:'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body:JSON.stringify({prompt:message,context:response})
+      })
+      const data = await resp.json();
+      const parsedPrediction = JSON.parse(data.prediction);
+      console.log(parsedPrediction);
+      const cloudPilot = document.getElementById("cloudPilot");
+      const newCloudPilot = cloudPilot.cloneNode(true);
+      const newMessage = newCloudPilot.querySelector('#cloudPilot-message');
+      newMessage.textContent = parsedPrediction.instructions;
+      const chatbox = document.getElementById("chatArea");
+      chatbox.appendChild(newCloudPilot);
+      newCloudPilot.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end'
+      });
+    });
   }
 
   } else {
