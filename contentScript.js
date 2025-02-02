@@ -216,13 +216,6 @@
     });
   }
 
-  // function loadNewDOM() {
-  //   window.addEventListener('load', function() {
-  //     const newDOM = extractDOM();
-  //   });
-  //   return newDOM;
-  // }
-
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
     const { type, body } = obj;
   
@@ -244,7 +237,7 @@
             });
   
             // Remove the event listener after the first click
-            element.removeEventListener('click', handleClick);
+            // element.removeEventListener('click', handleClick);
           });
   
           openHiddenNavIfNeeded(element);

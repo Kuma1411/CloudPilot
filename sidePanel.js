@@ -34,13 +34,42 @@ function handleNavigate(){
   }
 }
 
+function allFramesLoaded(activeTab){
+  chrome.tabs.sendMessage(activeTab.id, {
+    type: "extractDOM",
+    body: "dom"
+  }, (response) => {
+    if (chrome.runtime.lastError) {
+      console.error("DOM extraction error:", chrome.runtime.lastError);
+      return;
+    }
+    console.log("Full context:", JSON.stringify(response));
+  });
+}
+
 chrome.runtime.onMessage.addListener((obj, sender, response) => {
   const { type, body } = obj;
 
   if (type === "elementClicked") {
-    console.log("Response from contentScript.js:", body);
+    console.log("Response from contentScript:", body);
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length === 0) return console.error("No active tab found");
+      const activeTab = tabs[0];
+
+      // Wait for main page load
+      chrome.tabs.onUpdated.addListener(function onTabUpdated(tabId, changeInfo) {
+        if (tabId !== activeTab.id || changeInfo.status !== 'complete') return;
+        
+      chrome.webNavigation.getAllFrames({
+          tabId: tabId,
+      }).then(allFramesLoaded(activeTab))
+        chrome.tabs.onUpdated.removeListener(onTabUpdated);
+      });
+    });
   }
 });
+
 
 async function handleSubmit() {
   const textField = document.getElementById('text-input');
@@ -65,9 +94,16 @@ async function handleSubmit() {
         body: "dom"
       }, async (response) => {
         console.log(JSON.stringify({ prompt: message, context: response }));
+        // const resp = await fetch('http://127.0.0.1:8000/navigate',{
+        //   method:'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json'
+        //   },
+        //   body:JSON.stringify({prompt:message,context:response})
+        // })
 
-        // Mock response for testing
-        const data = { "instructions": "Click on add widgets", "name": "Add Widgets" };
+        // const data = await resp.json();
+        const data = { "instructions": "Click on add widgets", "name": "View all services" };
         const parsedPrediction = data; // JSON.parse(data);
         console.log(parsedPrediction);
 
