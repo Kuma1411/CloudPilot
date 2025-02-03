@@ -218,21 +218,36 @@
 
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
     const { type, body } = obj;
-
+  
     if (type === "navigate") {
-        if (body) {
-          const element = findElementByTextInDOM(body);
-          if (element) {
-            removeGlow();
-            element.classList.add('glow');
-            openHiddenNavIfNeeded(element);
-            openHiddenDropDownIfNeeded(element);
-            if (element.getBoundingClientRect().top >= window.innerHeight || element.getBoundingClientRect().bottom <= 0) {
-              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-         
+      if (body) {
+        const element = findElementByTextInDOM(body);
+        if (element) {
+          removeGlow();
+          element.classList.add('glow');
+  
+          // Add event listener to the element
+          element.addEventListener('click', function handleClick(event) {
+            console.log("Button Clicked!!!");
+  
+            // Send a message back to the side panel
+            chrome.runtime.sendMessage({
+              type: "elementClicked",
+              body: "Button is clicked!!!"
+            });
+  
+            // Remove the event listener after the first click
+            // element.removeEventListener('click', handleClick);
+          });
+  
+          openHiddenNavIfNeeded(element);
+          openHiddenDropDownIfNeeded(element);
+  
+          if (element.getBoundingClientRect().top >= window.innerHeight || element.getBoundingClientRect().bottom <= 0) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }
+      }
     }
     if (type === "extractDOM") {
       response(extractDOM()); 
