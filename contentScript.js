@@ -217,29 +217,34 @@
   }
 
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
-    const { type, body } = obj;
+    const { type, body, prompt } = obj;
   
     if (type === "navigate") {
-      if (body) {
-        const element = findElementByTextInDOM(body);
+      if (body.name) {
+        const element = findElementByTextInDOM(body.name);
         if (element) {
           removeGlow();
           element.classList.add('glow');
+
+          const isCompleted = body.isCompleted;
   
-          // Add event listener to the element
-          element.addEventListener('click', function handleClick(event) {
-            console.log("Button Clicked!!!");
-  
-            // Send a message back to the side panel
-            chrome.runtime.sendMessage({
-              type: "elementClicked",
-              body: "Button is clicked!!!"
+          if(!isCompleted){
+              // Add event listener to the element
+            element.addEventListener('click', function handleClick(event) {
+              console.log("Button Clicked!!!");
+              element.removeEventListener('click', handleClick);
+      
+              // Send a message back to the side panel
+              chrome.runtime.sendMessage({
+                type: "elementClicked",
+                body: "Button is clicked!!!",
+                prompt: prompt
+              });
+              
+             
             });
-  
-            // Remove the event listener after the first click
-            // element.removeEventListener('click', handleClick);
-          });
-  
+          }
+             
           openHiddenNavIfNeeded(element);
           openHiddenDropDownIfNeeded(element);
   

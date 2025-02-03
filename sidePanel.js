@@ -15,6 +15,14 @@ let userChatHtml = `
 </div>
 `
 
+let pauseMenuHtml = `
+<div class="chatBox">
+<div style="display: flex; flex-direction: row; align-content: center; justify-content:center;">
+  <button id="pause-btn" class="pauseBtn"><img style="height:20px;" src="assets/pause.png"></button>
+</div>
+</div>
+`
+
 function autoExpand(field) {
     field.style.height = 'auto'; // Reset the height
     field.style.height = Math.max(field.scrollHeight, 60) + 'px'; // Set it to the scrollHeight
@@ -34,39 +42,76 @@ function handleNavigate(){
   }
 }
 
-function allFramesLoaded(activeTab){
+
+async function fetchInstruct(prompt,context){
+  const resp = await fetch('http://127.0.0.1:8000/instruct',{
+        method:'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body:JSON.stringify({prompt:prompt,context:context})
+      })
+
+      const data = await resp.json();
+      const parsedPrediction = JSON.parse(data);
+      return parsedPrediction
+}
+
+     
+async function fetchNavigate(prompt,context){
+  const resp = await fetch('http://127.0.0.1:8000/navigate',{
+    method:'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body:JSON.stringify({prompt:prompt,context:context})
+  })
+
+  const data = await resp.json();
+  const parsedPrediction = JSON.parse(data);
+  return parsedPrediction
+}
+
+
+
+
+
+function domChanged(activeTab,prompt){
   chrome.tabs.sendMessage(activeTab.id, {
     type: "extractDOM",
-    body: "dom"
+    body: "dom",
+    prompt: prompt
   }, (response) => {
     if (chrome.runtime.lastError) {
       console.error("DOM extraction error:", chrome.runtime.lastError);
-      return;
+      return [];
     }
     console.log("Full context:", JSON.stringify(response));
+    return JSON.stringify(response);
   });
+  return [];
 }
 
 chrome.runtime.onMessage.addListener((obj, sender, response) => {
-  const { type, body } = obj;
+  const { type, body, prompt } = obj;
 
   if (type === "elementClicked") {
     console.log("Response from contentScript:", body);
-
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs.length === 0) return console.error("No active tab found");
-      const activeTab = tabs[0];
-
-      // Wait for main page load
-      chrome.tabs.onUpdated.addListener(function onTabUpdated(tabId, changeInfo) {
-        if (tabId !== activeTab.id || changeInfo.status !== 'complete') return;
+      chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+        if (changeInfo.status === 'complete') {
+          console.log('Page finished loading or URL changed to:', tab.url);
+            console.log("prompt",prompt)
+            // const prediction = await fetchNavigate(prompt,domChanged(tab))
+            domChanged(tab,prompt)
+            const prediction = { "instructions": "Click on add widgets", "name": "Batch", "isCompleted": false };
+            chrome.tabs.sendMessage(tab.id, {
+              type: "navigate",
+              body: prediction,
+              prompt: prompt
+            });
+          }
         
-      chrome.webNavigation.getAllFrames({
-          tabId: tabId,
-      }).then(allFramesLoaded(activeTab))
-        chrome.tabs.onUpdated.removeListener(onTabUpdated);
       });
-    });
   }
 });
 
@@ -89,79 +134,70 @@ async function handleSubmit() {
     });
 
     if (isNavigate) {
+        const chatBox = document.getElementById("chatBox");
+        const pauseMenu = document.createElement("div");
+        pauseMenu.id = "pauseMenu";  // Optional: Add an ID or other attributes
+        pauseMenu.innerHTML = pauseMenuHtml;  // Add content to the new div
+        if (chatBox) {
+          chatBox.replaceWith(pauseMenu);
+          const pauseButton = document.getElementById('pause-btn');
+          if(pauseButton){
+           pauseButton.addEventListener('click', function(){
+            console.log("asdfasdfadf")
+             pauseMenu.replaceWith(chatBox);
+           });
+          }
+        }
       chrome.tabs.sendMessage(activeTab.id, {
         type: "extractDOM",
         body: "dom"
       }, async (response) => {
         console.log(JSON.stringify({ prompt: message, context: response }));
-        // const resp = await fetch('http://127.0.0.1:8000/navigate',{
-        //   method:'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body:JSON.stringify({prompt:message,context:response})
-        // })
-
-        // const data = await resp.json();
-        const data = { "instructions": "Click on add widgets", "name": "View all services" };
-        const parsedPrediction = data; // JSON.parse(data);
-        console.log(parsedPrediction);
-
-        if (parsedPrediction) {
+        // const prediction = await fetchNavigate(message,response)
+        const prediction = { "instructions": "Click on add widgets", "name": "View all services", "isCompleted": false };
+        if (prediction) {
           chrome.tabs.sendMessage(activeTab.id, {
             type: "navigate",
-            body: parsedPrediction.name
+            body: prediction,
+            prompt: message
           });
         }
 
         const cloudPilot = document.getElementById("cloudPilot");
         const newCloudPilot = cloudPilot.cloneNode(true);
         const newMessage = newCloudPilot.querySelector('#cloudPilot-message');
-        newMessage.textContent = parsedPrediction.instructions;
+        newMessage.textContent = prediction.instructions;
         const chatbox = document.getElementById("chatArea");
         chatbox.appendChild(newCloudPilot);
         newCloudPilot.scrollIntoView({
           behavior: 'smooth',
           block: 'end'
         });
+      })
 
-        const submitButton = document.getElementById('submit-btn');
-        submitButton.removeEventListener('click', handleSubmit);
-        submitButton.style.backgroundColor = "grey";
-      });
-    }
-  }else{
-    chrome.tabs.sendMessage(activeTab.id, {
-      type: "extractDOM",
-      body: "dom"
-    }, async (response) => {
-      console.log(JSON.stringify({prompt:message,context:response}))
-      // const resp = await fetch('http://127.0.0.1:8000/instruct',{
-      //   method:'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body:JSON.stringify({prompt:message,context:response})
-      // })
-
-      // const data = await resp.json();
-      const data = {"instructions": "Click on a widgets"}
-      const parsedPrediction = JSON.parse(data);
-      console.log(parsedPrediction);
-      const cloudPilot = document.getElementById("cloudPilot");
-      const newCloudPilot = cloudPilot.cloneNode(true);
-      const newMessage = newCloudPilot.querySelector('#cloudPilot-message');
-      newMessage.textContent = parsedPrediction.instructions;
-      const chatbox = document.getElementById("chatArea");
-      chatbox.appendChild(newCloudPilot);
-      newCloudPilot.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end'
-      });
-    });
+      // });
+    // }
+  }
+  //else{
+  //   chrome.tabs.sendMessage(activeTab.id, {
+  //     type: "extractDOM",
+  //     body: "dom"
+  //   }, async (response) => {
+  //     console.log(JSON.stringify({prompt:message,context:response}))
+  //     const prediction = await fetchInstruct(message,response)
+  //     const cloudPilot = document.getElementById("cloudPilot");
+  //     const newCloudPilot = cloudPilot.cloneNode(true);
+  //     const newMessage = newCloudPilot.querySelector('#cloudPilot-message');
+  //     newMessage.textContent = prediction.instructions;
+  //     const chatbox = document.getElementById("chatArea");
+  //     chatbox.appendChild(newCloudPilot);
+  //     newCloudPilot.scrollIntoView({
+  //       behavior: 'smooth',
+  //       block: 'end'
+  //     });
+  //   });
   }
 }
-
 
 
 
@@ -172,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const submitButton = document.getElementById('submit-btn');
   submitButton.addEventListener('click', handleSubmit);
  
-
 
   const navigateButton = document.getElementById('navigate-btn');
   navigateButton.addEventListener('click',handleNavigate);
