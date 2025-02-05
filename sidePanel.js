@@ -77,7 +77,7 @@ async function fetchNavigate(prompt,context){
 
 
 function domChanged(activeTab,prompt){
-  chrome.tabs.sendMessage(activeTab.id, {
+  chrome.tabs.sendMessage(activeTab, {
     type: "extractDOM",
     body: "dom",
     prompt: prompt
@@ -102,9 +102,9 @@ chrome.runtime.onMessage.addListener((obj, sender, response) => {
           console.log('Page finished loading or URL changed to:', tab.url);
             console.log("prompt",prompt)
             // const prediction = await fetchNavigate(prompt,domChanged(tab))
-            domChanged(tab,prompt)
+            domChanged(tabId,prompt)
             const prediction = { "instructions": "Click on add widgets", "name": "Batch", "isCompleted": false };
-            chrome.tabs.sendMessage(tab.id, {
+            chrome.tabs.sendMessage(tabId, {
               type: "navigate",
               body: prediction,
               prompt: prompt

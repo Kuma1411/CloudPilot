@@ -225,7 +225,8 @@
         if (element) {
           removeGlow();
           element.classList.add('glow');
-
+          openHiddenNavIfNeeded(element);
+          openHiddenDropDownIfNeeded(element);
           const isCompleted = body.isCompleted;
   
           if(!isCompleted){
@@ -244,9 +245,7 @@
              
             });
           }
-             
-          openHiddenNavIfNeeded(element);
-          openHiddenDropDownIfNeeded(element);
+            
   
           if (element.getBoundingClientRect().top >= window.innerHeight || element.getBoundingClientRect().bottom <= 0) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
